@@ -1,0 +1,4 @@
+.vscode
+configdb/
+development/
+__pycache__/

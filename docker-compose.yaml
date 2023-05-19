@@ -1,0 +1,28 @@
+version: '3'
+services:
+
+  database_service:
+    image: "mongo:latest"
+    container_name: mongodb
+    ports:
+      - 27017:27017
+    # links:
+    #   - fastapi-server
+
+  fastapi-server:
+    build: .
+    container_name: fastapi
+    restart: on-failure
+    links:
+      - database_service
+    volumes:
+      - .:/code
+    environment:
+      - MONGODB_HOST=database_service
+      - MONGODB_PORT=27017
+      - APP_PORT=8000
+      - MONGODB_NAME=kimo
+    ports:
+      - 8000:8000
+
+
