@@ -17,7 +17,6 @@ class ChapterUpdate(BaseModel):
 
 @app.get('/courses')
 def all_courses(title: Union[int,None] = None , date: Union[int,None]= None, course_rating: Union[int,None]=None, domains: Union[str,None]=None):
-    query = {}
     valid_domains = []
     coll = db.get_collection("courses")
 
@@ -25,11 +24,25 @@ def all_courses(title: Union[int,None] = None , date: Union[int,None]= None, cou
     if domains is not None: 
         domains = domains.split(",")
         valid_domains = [ObjectId(domain) for domain in domains]
-        query["domains"]["$in"] = valid_domains # [ObjectId('hexid'), ....  ]
     
     if title != None and title == 1 : 
         res = []
-        cur = coll.find(query,{"chapters":0,"total_like":0,"total_dislike":0}).sort("name",ASCENDING)
+        query=[]
+        if len(valid_domains) != 0 :
+            query.append({"$match":{"$in": valid_domains}})
+        query.append({"$sort":{"name": 1}})
+        query.append({"$lookup":{
+            "from": "domains",
+            "localField": "domains",
+            "foreignField":"_id",
+            "as":"domain_mappings"
+        }})
+        query.append({"$project": {
+            "chapters": 0 ,
+            "domains":0
+        }})
+        print(query)
+        cur = coll.aggregate(query)
         for doc in cur:
             res.append(doc)
         data = json.loads(json_util.dumps(res))
@@ -38,7 +51,22 @@ def all_courses(title: Union[int,None] = None , date: Union[int,None]= None, cou
     
     if date != None and date == -1 : 
         res = []
-        cur =   coll.find(query,{"chapters":0,"total_like":0,"total_dislike":0}).sort("date",DESCENDING)
+        query=[]
+        if len(valid_domains) != 0 :
+            query.append({"$match":{"$in": valid_domains}})
+        query.append({"$sort":{"date": -1}})
+        query.append({"$lookup":{
+            "from": "domains",
+            "localField": "domains",
+            "foreignField":"_id",
+            "as":"domain_mappings"
+        }})
+        query.append({"$project": {
+            "chapters": 0 ,
+            "domains":0
+        }})
+        print(query)
+        cur = coll.aggregate(query)
         for doc in cur:
             res.append(doc)
         data = json.loads(json_util.dumps(res))
@@ -79,7 +107,16 @@ def all_courses(title: Union[int,None] = None , date: Union[int,None]= None, cou
         }
         })
         query.append({"$sort":{"rating":-1}})
-        query.append({"$project":{"chapters":0,"total_like":0,"total_dislike":0}})
+        query.append({"$lookup":{
+            "from": "domains",
+            "localField": "domains",
+            "foreignField":"_id",
+            "as":"domain_mappings"
+        }})
+        query.append({"$project": {
+            "chapters": 0 ,
+            "domains":0
+        }})
         cur =   coll.aggregate(query)
         for doc in cur:
             res.append(doc)
