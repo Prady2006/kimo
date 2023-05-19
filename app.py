@@ -16,20 +16,27 @@ class ChapterUpdate(BaseModel):
     dislike: bool  = False 
 
 @app.get('/courses')
-def all_courses(title: Union[int,None] = None , date: Union[int,None]= None, course_rating: Union[int,None]=None, domains: Union[str,None]=None):
+def all_courses(page: Union[int,None]= 0 , title: Union[int,None] = None , date: Union[int,None]= None, course_rating: Union[int,None]=None, domains: Union[str,None]=None):
     valid_domains = []
     coll = db.get_collection("courses")
-
+    current_page_number = page
+    number_of_docs_per_page = 2
     # need to add empty object to satisfy prefix of compound idx .
     if domains is not None: 
         domains = domains.split(",")
-        valid_domains = [ObjectId(domain) for domain in domains]
+        # valid_domains = [ObjectId(domain) for domain in domains]
+        for domain in domains:
+            try:
+                id = ObjectId(domain)
+                valid_domains.append(id)
+            except Exception :
+                print(domain)
     
     if title != None and title == 1 : 
         res = []
         query=[]
         if len(valid_domains) != 0 :
-            query.append({"$match":{"$in": valid_domains}})
+            query.append({"$match": { "domains":{"$in": valid_domains}} })
         query.append({"$sort":{"name": 1}})
         query.append({"$lookup":{
             "from": "domains",
@@ -41,6 +48,8 @@ def all_courses(title: Union[int,None] = None , date: Union[int,None]= None, cou
             "chapters": 0 ,
             "domains":0
         }})
+        query.append({"$skip": number_of_docs_per_page * current_page_number})
+        query.append({"$limit": number_of_docs_per_page})
         print(query)
         cur = coll.aggregate(query)
         for doc in cur:
@@ -53,7 +62,7 @@ def all_courses(title: Union[int,None] = None , date: Union[int,None]= None, cou
         res = []
         query=[]
         if len(valid_domains) != 0 :
-            query.append({"$match":{"$in": valid_domains}})
+            query.append({"$match":{"domains": {"$in": valid_domains}}})
         query.append({"$sort":{"date": -1}})
         query.append({"$lookup":{
             "from": "domains",
@@ -65,6 +74,8 @@ def all_courses(title: Union[int,None] = None , date: Union[int,None]= None, cou
             "chapters": 0 ,
             "domains":0
         }})
+        query.append({"$skip": number_of_docs_per_page * current_page_number})
+        query.append({"$limit": number_of_docs_per_page})
         print(query)
         cur = coll.aggregate(query)
         for doc in cur:
@@ -77,7 +88,8 @@ def all_courses(title: Union[int,None] = None , date: Union[int,None]= None, cou
         res = []
         query=[]
         if len(valid_domains) != 0 : 
-            query.append({"$match":{"$in":valid_domains}})
+            query.append({"$match":{"domains": {"$in": valid_domains}}})
+
         query.append(
         {
             '$addFields': {
@@ -117,6 +129,8 @@ def all_courses(title: Union[int,None] = None , date: Union[int,None]= None, cou
             "chapters": 0 ,
             "domains":0
         }})
+        query.append({"$skip": number_of_docs_per_page * current_page_number})
+        query.append({"$limit": number_of_docs_per_page})
         cur =   coll.aggregate(query)
         for doc in cur:
             res.append(doc)
