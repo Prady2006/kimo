@@ -1,4 +1,5 @@
 .vscode
 configdb/
 development/
+scripts/node_modules/
 __pycache__/
