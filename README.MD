@@ -11,11 +11,13 @@
 ```
 
  ✨ Containers for both server and db should be up and running by now . ✨
-
+    Server will be running on http://localhost:8000/
 ## Startup Scripts 
 Run these commands to populate data in the mongodb .
 ```sh
  docker exec -it fastapi bash
+ cd scripts && npm install
+ cd ..
  node scripts/upload_data.js
  exit
 ```
@@ -30,3 +32,27 @@ Run these commands to populate data in the mongodb .
       mongodb_data_volume:
         external: true
 
+# GET /courses
+    Query Parameters:
+     title : optional (for sort by  title of course value can only be 1 )
+     date : optional (for sort by  date of course value can only be -1 )
+     course_rating : optional (for sort by  rating of course value can only be -1) 
+     page: optional (for pagination default value is 0 , only accepts integers 0...n )
+    
+# GET /courses/{course_id}
+
+    Get all the data of a course with course id as course_id . 
+    
+# GET /chapters/{chapter_id}
+
+    Get all the data of a chapter with chapter id as chapter_id. 
+    
+# POST /courses/{course_id}/chapters/{chapter_id}
+
+    Body: 
+     like : true (Optional)
+     dislike: true (Optional)
+     Can only send single value at a time either like or dislike set to true .
+     
+> All the ids mentioned are mongodb object ids .
+>
