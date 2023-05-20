@@ -21,7 +21,8 @@ Run these commands to populate data in the mongodb .
  node scripts/upload_data.js
  exit
 ```
-
+Mongo collections and schemas are built by upload_data.js under scripts/ folder, it also creates appropriate compound idx's needed by the search courses, chapters api .
+The given script is responsible to parse data from courses.json file and dump onto mongodb .
 > Note : When containers are killed data wont be persisted on to the disk , if you wish to persist the data onto disk , so that on containers restart data is not lost .Kindly add the below command to the docker-compose.yaml .
 >
     volumes:
