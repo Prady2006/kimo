@@ -34,6 +34,7 @@ Run these commands to populate data in the mongodb .
 
 # GET /courses
     Query Parameters:
+     domains: optional(  partial filter "," seperated mongo object ids )
      title : optional (for sort by  title of course value can only be 1 )
      date : optional (for sort by  date of course value can only be -1 )
      course_rating : optional (for sort by  rating of course value can only be -1) 
